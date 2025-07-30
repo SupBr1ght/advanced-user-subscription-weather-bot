@@ -3,8 +3,9 @@ import { Context } from 'telegraf';
 import { WeatherService } from '../weather/weather.service';
 import { UsersService } from '../user/user.service';
 import * as cron from 'node-cron';
-import { isTextMessage } from 'src/helper/message.guard';
+import { isTextMessage, isLocationMessage } from 'src/helper/message.helper';
 import { Markup } from 'telegraf';
+import { Message, Location } from 'telegraf/typings/core/types/typegram';
 
 @Update()
 export class BotService {
@@ -99,7 +100,7 @@ export class BotService {
     return ctx.reply(
       'Please share your location so we can send you weather updates for your area:',
       Markup.keyboard([
-        Markup.button.locationRequest('Share Location'),
+        Markup.button.locationRequest('📍 Share Location'),
       ])
         .resize()
         .oneTime()
@@ -107,23 +108,22 @@ export class BotService {
   }
 
   @On('location')
-  async handleLocation(@Ctx() ctx: Context) {
+  async onLocation(@Ctx() ctx: Context) {
     const chatId = ctx.chat?.id;
-    const location = ctx.message?.location;
+    const message = ctx.message as Message.LocationMessage;
+    const location = message.location
 
     if (!location) {
-      return ctx.reply('Could not get your location.');
+      return ctx.reply('Sorry, we could not get your location.');
     }
 
     const { latitude, longitude } = location;
 
-    // update user's location
     const updated = await this.usersService.updateLocation(chatId!, latitude, longitude);
     if (updated) {
-      ctx.reply(`Location updated! (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
+      return ctx.reply(`📍 Location updated! (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
     } else {
-      ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
+      return ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
     }
   }
-
 }
