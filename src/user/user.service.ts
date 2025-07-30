@@ -17,7 +17,6 @@ export class UsersService {
     try {
       // read mock db with users
       const data = fs.readFileSync(USERS_FILE, 'utf-8');
-      console.log("Saved in dir", USERS_FILE)
       // conver json data into js object 
       this.users = JSON.parse(data);
     } catch {
@@ -43,7 +42,9 @@ export class UsersService {
   // remove user from mock db
   removeUser(id: number): boolean {
     if (this.users.includes(id)) {
+      // get existing user in mock db
       this.users = this.users.filter(uid => uid !== id);
+      // remove user from db
       this.saveUsers();
       return true;
     }
