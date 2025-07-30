@@ -37,7 +37,17 @@ export class UsersService {
     return result.deletedCount > 0;
   }
 
-  getUsers(): number[] {
+  // check if user subscribe on servise true/false
+  async isSubscribed(chatId: number): Promise<boolean> {
+    const user = await this.userModel.findOne({ chatId });
+    if (user) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async getUsers(): Promise<UserSubscription[]> {
     return this.users;
   }
 }
