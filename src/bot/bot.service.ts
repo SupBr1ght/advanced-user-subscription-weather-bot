@@ -23,7 +23,13 @@ export class BotService {
   @Command('subscribe')
   async subscribe(ctx: Context) {
     const id = ctx.chat?.id;
-    const added = this.usersService.addUser(id!);
+    const added = await this.usersService.addUser({
+      chatId: id!,
+      cronTime: '0 8 * * *', // 8:00 by default
+      latitude: 50.4501,
+      longitude: 30.5234,
+      timeZone: 'Europe/Kyiv',
+    });                   
     if (added) {
       await ctx.reply('You have subscribed successfuly!');
     } else {
@@ -35,7 +41,7 @@ export class BotService {
   async unsubscribe(ctx: Context) {
     const id = ctx.chat?.id;
     // remove user from db
-    const removed = this.usersService.removeUser(id!);
+    const removed = await this.usersService.removeUser(id!);
     if (removed) {
       await ctx.reply('You have unsubscribed successfuly!');
     } else {
@@ -45,7 +51,7 @@ export class BotService {
 
   setupDailyWeatherTask() {
     cron.schedule('0 8 * * *', async () => {
-      const users = this.usersService.getUsers();
+      const users = await this.usersService.getUsers();
       const weather = await this.weatherService.getWeather();
       for (const id of users) {
         await this.bot.telegram.sendMessage(id, weather);
