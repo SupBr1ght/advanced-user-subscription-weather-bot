@@ -1,9 +1,10 @@
-import { InjectBot, Start, Update, Command, Ctx } from 'nestjs-telegraf';
+import { InjectBot, Start, Update, Command, Ctx, On } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { WeatherService } from '../weather/weather.service';
 import { UsersService } from '../user/user.service';
 import * as cron from 'node-cron';
-import { isTextMessage } from 'src/guards/message.guard';
+import { isTextMessage } from 'src/helper/message.guard';
+import { Markup } from 'telegraf';
 
 @Update()
 export class BotService {
@@ -18,7 +19,8 @@ export class BotService {
 
   @Start()
   async startCommand(ctx: Context) {
-    await ctx.reply('Hello type /subscribe to get notification about weather in particular time!');
+    await ctx.reply('Hello type /subscribe to get notification about weather in particular time!' +
+      'If you want to change your geo or time when bot will send you message please type / location or / settime');
   }
 
   @Command('subscribe')
@@ -87,6 +89,38 @@ export class BotService {
     const updated = await this.usersService.updateCronTime(chatId!, time);
     if (updated) {
       ctx.reply(`Time updated! We'll message you at ${time}`);
+    } else {
+      ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
+    }
+  }
+
+  @Command('location')
+  async requestLocation(@Ctx() ctx: Context) {
+    return ctx.reply(
+      'Please share your location so we can send you weather updates for your area:',
+      Markup.keyboard([
+        Markup.button.locationRequest('Share Location'),
+      ])
+        .resize()
+        .oneTime()
+    );
+  }
+
+  @On('location')
+  async handleLocation(@Ctx() ctx: Context) {
+    const chatId = ctx.chat?.id;
+    const location = ctx.message?.location;
+
+    if (!location) {
+      return ctx.reply('Could not get your location.');
+    }
+
+    const { latitude, longitude } = location;
+
+    // update user's location
+    const updated = await this.usersService.updateLocation(chatId!, latitude, longitude);
+    if (updated) {
+      ctx.reply(`Location updated! (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
     } else {
       ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
     }
