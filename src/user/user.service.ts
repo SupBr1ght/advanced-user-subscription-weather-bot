@@ -58,4 +58,13 @@ export class UsersService {
     await user.save();
     return true;
   }
+
+  // update user geo
+  async updateLocation(chatId: number, latitude: number, longitude: number): Promise<boolean> {
+    const result = await this.userModel.updateOne(
+      { chatId },
+      { $set: { latitude, longitude } }
+    );
+    return result.modifiedCount > 0;
+  }
 }

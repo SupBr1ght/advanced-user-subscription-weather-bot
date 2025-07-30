@@ -100,7 +100,7 @@ export class BotService {
     return ctx.reply(
       'Please share your location so we can send you weather updates for your area:',
       Markup.keyboard([
-        Markup.button.locationRequest('📍 Share Location'),
+        Markup.button.locationRequest('Share Location'),
       ])
         .resize()
         .oneTime()
@@ -121,7 +121,7 @@ export class BotService {
 
     const updated = await this.usersService.updateLocation(chatId!, latitude, longitude);
     if (updated) {
-      return ctx.reply(`📍 Location updated! (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
+      return ctx.reply(`Location updated! (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
     } else {
       return ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
     }
