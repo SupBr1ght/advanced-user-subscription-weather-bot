@@ -48,4 +48,14 @@ export class UsersService {
   async getUsers(): Promise<UserSubscription[]> {
     return this.userModel.find();
   }
+
+  // add service to update crontime for users preferences
+  async updateCronTime(chatId: number, time: string): Promise<boolean> {
+    const user = await this.userModel.findOne({ chatId });
+    if (!user) return false;
+
+    user.cronTime = time;
+    await user.save();
+    return true;
+  }
 }
