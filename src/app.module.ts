@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { TelegrafModule } from 'nestjs-telegraf';
 import { BotModule } from './bot/bot.module';
-import { WeatherService } from './weather/weather.service';
-import { UserService } from './user/user.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [BotModule],
-  controllers: [AppController],
-  providers: [AppService, WeatherService, UserService],
+  imports: [
+    // connect .env file globally
+    ConfigModule.forRoot({ isGlobal: true }),
+    // connect telegram bot
+    TelegrafModule.forRoot({
+      // force to point typescript that .env with this variable exist by '!'
+      token: process.env.BOT_TOKEN!,
+    }),
+    BotModule,
+  ],
 })
 export class AppModule {}
