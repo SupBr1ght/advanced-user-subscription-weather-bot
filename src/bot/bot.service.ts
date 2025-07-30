@@ -34,6 +34,7 @@ export class BotService {
   @Command('unsubscribe')
   async unsubscribe(ctx: Context) {
     const id = ctx.chat?.id;
+    console.log('chat.id:', ctx.chat?.id);
     // remove user from db
     const removed = this.usersService.removeUser(id!);
     if (removed) {

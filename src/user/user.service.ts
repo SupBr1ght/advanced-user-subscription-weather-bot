@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const USERS_FILE = path.join(__dirname, 'users.json');
+const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
 
 @Injectable()
 export class UsersService {
@@ -17,6 +17,7 @@ export class UsersService {
     try {
       // read mock db with users
       const data = fs.readFileSync(USERS_FILE, 'utf-8');
+      console.log("Saved in dir", USERS_FILE)
       // conver json data into js object 
       this.users = JSON.parse(data);
     } catch {
