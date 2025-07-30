@@ -1,42 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
-
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
+import { InjectModel } from '@nestjs/mongoose';
+import { UserSubscription } from '../models/user.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UsersService {
   private users: number[] = [];
 
-  constructor() {
-    // run once after DI initialization
-    this.loadUsers();
-  }
+  constructor(
+    @InjectModel(UserSubscription.name)
+    private readonly userModel: Model<UserSubscription>,
+  ) { }
 
-  loadUsers() {
-    try {
-      // read mock db with users
-      const data = fs.readFileSync(USERS_FILE, 'utf-8');
-      // conver json data into js object 
-      this.users = JSON.parse(data);
-    } catch {
-      this.users = [];
-    }
-  }
+  // save user to db
+  async addUser(data: {
+    chatId: number;
+    cronTime: string;
+    latitude: number;
+    longitude: number;
+    timeZone?: string;
+  }): Promise<boolean> {
+    const exists = await this.userModel.findOne({ chatId: data.chatId });
+    if (exists) return false;
 
-  // save users into mock db
-  saveUsers() {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(this.users, null, 2));
-  }
+    await this.userModel.create({
+      ...data,
+      enabled: true,
+    });
 
-  // add user to file
-  addUser(id: number): boolean {
-    if (!this.users.includes(id)) {
-      this.users.push(id);
-      this.saveUsers();
-      return true;
-    }
-    return false;
+    return true;
   }
 
   // remove user from mock db
