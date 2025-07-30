@@ -31,16 +31,10 @@ export class UsersService {
     return true;
   }
 
-  // remove user from mock db
-  removeUser(id: number): boolean {
-    if (this.users.includes(id)) {
-      // get existing user in mock db
-      this.users = this.users.filter(uid => uid !== id);
-      // remove user from db
-      this.saveUsers();
-      return true;
-    }
-    return false;
+  // remove user from  db
+  async removeUser(chatId: number): Promise<boolean> {
+    const result = await this.userModel.deleteOne({ chatId });
+    return result.deletedCount > 0;
   }
 
   getUsers(): number[] {
