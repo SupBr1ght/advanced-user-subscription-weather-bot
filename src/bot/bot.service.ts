@@ -1,7 +1,7 @@
 import { InjectBot, Start, Update, Command } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { WeatherService } from '../weather/weather.service';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../user/user.service';
 import * as cron from 'node-cron';
 
 @Update()
@@ -23,7 +23,7 @@ export class BotService {
   @Command('subscribe')
   async subscribe(ctx: Context) {
     const id = ctx.chat?.id;
-    const added = this.usersService.addUser(id);
+    const added = this.usersService.addUser(id!);
     if (added) {
       await ctx.reply('You have subscribed successfuly!');
     } else {
@@ -35,7 +35,7 @@ export class BotService {
   async unsubscribe(ctx: Context) {
     const id = ctx.chat?.id;
     // remove user from db
-    const removed = this.usersService.removeUser(id);
+    const removed = this.usersService.removeUser(id!);
     if (removed) {
       await ctx.reply('You have unsubscribed successfuly!');
     } else {
