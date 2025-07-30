@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema()
-export class UserSubscription extends Document {
+export class UserSubscription {
   @Prop({ required: true })
   chatId: number;
 
@@ -21,5 +21,7 @@ export class UserSubscription extends Document {
   @Prop({ default: true, required: true })
   enabled: boolean;
 }
+
+export type UserSubscriptionDocument = UserSubscription & Document;
 
 export const UserSubscriptionSchema = SchemaFactory.createForClass(UserSubscription);

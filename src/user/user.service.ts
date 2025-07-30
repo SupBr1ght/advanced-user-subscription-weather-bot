@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserSubscription } from '../models/user.schema';
+import { UserSubscription, UserSubscriptionDocument } from '../models/user.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserSubscription.name)
-    private readonly userModel: Model<UserSubscription>,
+    private readonly userModel: Model<UserSubscriptionDocument>, 
   ) { }
 
   // save user to db
