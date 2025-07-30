@@ -1,8 +1,9 @@
-import { InjectBot, Start, Update, Command } from 'nestjs-telegraf';
+import { InjectBot, Start, Update, Command, Ctx } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { WeatherService } from '../weather/weather.service';
 import { UsersService } from '../user/user.service';
 import * as cron from 'node-cron';
+import { isTextMessage } from 'src/guards/message.guard';
 
 @Update()
 export class BotService {
@@ -29,7 +30,7 @@ export class BotService {
       latitude: 50.4501,
       longitude: 30.5234,
       timeZone: 'Europe/Kyiv',
-    });                   
+    });
     if (added) {
       await ctx.reply('You have subscribed successfuly!');
     } else {
@@ -57,6 +58,38 @@ export class BotService {
         await this.bot.telegram.sendMessage(id, weather);
       }
     });
+  }
+
+  @Command('settime')
+  async setTime(@Ctx() ctx: Context) {
+    const chatId = ctx.chat?.id;
+
+    if (!isTextMessage(ctx.message)) {
+      return ctx.reply('Please send a text message like /settime 08:30');
+    }
+    const messageText = ctx.message?.text;
+
+    // e.g ["/settime", "08:30"]
+    const answer = messageText?.split(' ');
+    if (answer?.length !== 2) {
+      return ctx.reply('Please provide time like /settime 09:30');
+    }
+    // get time
+    const time = answer[1];
+
+    // validate correct format like hh:mm
+    const isValidTime = /^\d{2}:\d{2}$/.test(time);
+
+    if (!isValidTime) {
+      return ctx.reply('Time must be in HH:MM format, e.g. /settime 08:45');
+    }
+    // invoke method to save uodated time into db
+    const updated = await this.usersService.updateCronTime(chatId!, time);
+    if (updated) {
+      ctx.reply(`Time updated! We'll message you at ${time}`);
+    } else {
+      ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
+    }
   }
 
 }
