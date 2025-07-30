@@ -48,6 +48,6 @@ export class UsersService {
   }
 
   async getUsers(): Promise<UserSubscription[]> {
-    return this.users;
+    return this.userModel.find();
   }
 }
