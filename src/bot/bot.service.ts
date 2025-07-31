@@ -68,14 +68,16 @@ export class BotService {
     const chatId = ctx.chat?.id;
 
     if (!isTextMessage(ctx.message)) {
-      return ctx.reply('Please send a text message like /settime 08:30');
+      await ctx.reply('Please send a text message like /settime 08:30');
+      return;
     }
     const messageText = ctx.message?.text;
 
     // e.g ["/settime", "08:30"]
     const answer = messageText?.split(' ');
     if (answer?.length !== 2) {
-      return ctx.reply('Please provide time like /settime 09:30');
+      await ctx.reply('Please provide time like /settime 09:30');
+      return;
     }
     // get time
     const time = answer[1];
@@ -84,20 +86,24 @@ export class BotService {
     const isValidTime = /^\d{2}:\d{2}$/.test(time);
 
     if (!isValidTime) {
-      return ctx.reply('Time must be in HH:MM format, e.g. /settime 08:45');
+      await ctx.reply('Time must be in HH:MM format, e.g. /settime 08:45');
+      return;
     }
     // invoke method to save uodated time into db
     const updated = await this.usersService.updateCronTime(chatId!, time);
     if (updated) {
-      ctx.reply(`Time updated! We'll message you at ${time}`);
+      console.log(typeof time, time);
+      await ctx.reply(`Time updated! We'll message you at ${String(time)}`);
+      return;
     } else {
-      ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
+      await ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
+      return;
     }
   }
 
   @Command('location')
   async requestLocation(@Ctx() ctx: Context) {
-    return ctx.reply(
+    await ctx.reply(
       'Please share your location so we can send you weather updates for your area:',
       Markup.keyboard([
         Markup.button.locationRequest('Share Location'),
@@ -105,6 +111,7 @@ export class BotService {
         .resize()
         .oneTime()
     );
+    return;
   }
 
   @On('location')
@@ -114,16 +121,19 @@ export class BotService {
     const location = message.location
 
     if (!location) {
-      return ctx.reply('Sorry, we could not get your location.');
+      await ctx.reply('Sorry, we could not get your location.');
+      return;
     }
 
     const { latitude, longitude } = location;
 
     const updated = await this.usersService.updateLocation(chatId!, latitude, longitude);
     if (updated) {
-      return ctx.reply(`Location updated! (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
+      await ctx.reply(`Location updated! (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
+      return;
     } else {
-      return ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
+      await ctx.reply(`You are not subscribed yet. Use /subscribe first.`);
+      return;
     }
   }
 }
