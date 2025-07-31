@@ -92,7 +92,6 @@ export class UsersService implements OnModuleInit {
 
     const user = await this.userModel.findOne({ chatId });
     if (!user) return;
-
     const [hour, minute] = time.split(':').map(Number);
 
 
@@ -103,24 +102,15 @@ export class UsersService implements OnModuleInit {
     );
 
     const utcTime = userTime.setZone('UTC');
-
     const cronExpr = `${utcTime.minute} ${utcTime.hour} * * *`;
 
-    console.log(
-      `Scheduling weather notification for chatId ${chatId} at ${time} (${user.timeZone || 'Europe/Kyiv'}) = ${utcTime.toFormat('HH:mm')} UTC (cron: ${cronExpr})`
-    );
-
     const task = cron.schedule(cronExpr, async () => {
-      console.log(`[TASK] Sending weather to ${chatId} at ${new Date().toISOString()}`);
       const weather = await this.weatherServise.getWeather();
-      console.log('[WEATHER]', weather);
       await this.bot.telegram.sendMessage(chatId, weather);
-      console.log('[BOT] Message sent');
+
     });
 
     userTasks.set(chatId, task);
-
-    console.log(`Scheduled weather notification for chatId ${chatId} at ${time} (cron: ${cronExpr})`);
   }
 
   async initSchedules() {

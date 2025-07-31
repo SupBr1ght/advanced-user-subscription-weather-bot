@@ -25,9 +25,8 @@ export class WeatherService {
 💧 Humidity: ${data.main.humidity}%
 🌬 Wind: ${data.wind.speed} m/s`;
                 }),
-                catchError((err) => {
-                    console.error('[WEATHER_ERROR]', err?.response?.data || err.message || err);
-                    return of('⚠️ Не вдалося отримати погоду');
+                catchError(() => {
+                    return of('Can\'t get the weather');
                 })
             )
         );
