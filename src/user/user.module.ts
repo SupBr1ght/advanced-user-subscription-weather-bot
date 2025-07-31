@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSubscription, UserSubscriptionSchema } from '../models/user.schema';
 import { UsersService } from './user.service';
+import { WeatherService } from 'src/weather/weather.service';
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -9,8 +12,10 @@ import { UsersService } from './user.service';
     MongooseModule.forFeature([
       { name: UserSubscription.name, schema: UserSubscriptionSchema },
     ]),
+    HttpModule,
+    ConfigModule
   ],
-  providers: [UsersService],
+  providers: [UsersService, WeatherService],
   exports: [UsersService],
 })
 export class UsersModule {}

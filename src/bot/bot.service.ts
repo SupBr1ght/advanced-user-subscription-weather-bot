@@ -13,10 +13,7 @@ export class BotService {
     private weatherService: WeatherService,
     private usersService: UsersService,
     @InjectBot() private bot: any
-  ) {
-    // run once after initialization dependencies
-    this.setupDailyWeatherTask();
-  }
+  ) { }
 
   @Start()
   async startCommand(ctx: Context) {
@@ -35,6 +32,8 @@ export class BotService {
       timeZone: 'Europe/Kyiv',
     });
     if (added) {
+      // run scheduled task
+      await this.usersService.scheduleUserNotification(id!, '08:00');
       await ctx.reply('You have subscribed successfuly!');
     } else {
       await ctx.reply('You are  already subscribed! ');
@@ -51,16 +50,6 @@ export class BotService {
     } else {
       await ctx.reply('You haven\'\nt subscribed yet! ');
     }
-  }
-
-  setupDailyWeatherTask() {
-    cron.schedule('0 8 * * *', async () => {
-      const users = await this.usersService.getUsers();
-      const weather = await this.weatherService.getWeather();
-      for (const id of users) {
-        await this.bot.telegram.sendMessage(id, weather);
-      }
-    });
   }
 
   @Command('settime')
@@ -92,7 +81,7 @@ export class BotService {
     // invoke method to save uodated time into db
     const updated = await this.usersService.updateCronTime(chatId!, time);
     if (updated) {
-      console.log(typeof time, time);
+      await this.usersService.scheduleUserNotification(chatId!, time);
       await ctx.reply(`Time updated! We'll message you at ${String(time)}`);
       return;
     } else {
@@ -136,4 +125,5 @@ export class BotService {
       return;
     }
   }
+
 }
